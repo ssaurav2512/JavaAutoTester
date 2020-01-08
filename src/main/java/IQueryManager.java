@@ -10,7 +10,7 @@ public interface IQueryManager extends Closeable {
 
     // method to get the next query, 0 if there is no next query
 //C++ TO JAVA CONVERTER TODO TASK: The implementation of the following method could not be found:
-    IQuery getQuery(String[] sNewCategory);
+    IQuery getQuery(String[] sNewCategory) throws IOException;
 
     // method to get the next query, 0 if there is no next query
 //C++ TO JAVA CONVERTER TODO TASK: The implementation of the following method could not be found:
