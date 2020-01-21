@@ -11,18 +11,18 @@ public class JavaAutoTester {
 
     private static String outputfile = "";
     private static int argument = 0;
-    LinkedList<String> stu_ans = new LinkedList<String>; // collects the student's answer
-    private boolean bStartExp = false;
+    private static boolean bStartExp = false;
+    private static LinkedList<String> stu_ans = new LinkedList<String>(); // collects the student's answer
 
     public static int find_last_of(String sequence, String str) {
         return CharMatcher.anyOf( str ).lastIndexIn( sequence );
     }
 
-    public int find_first_not_of( String sequence, String str ) {
+    public static int find_first_not_of(String sequence, String str) {
         return CharMatcher.anyOf( str ).negate().indexIn( sequence );
     }
 
-    public int find_last_not_of( String sequence, String str ) {
+    public static int find_last_not_of(String sequence, String str) {
         return CharMatcher.anyOf( str ).negate().lastIndexIn( sequence );
     }
 
@@ -49,7 +49,7 @@ public class JavaAutoTester {
         System.out.print("\n");
     }
 
-    private int runOneTest(Object iValue) throws IOException {
+    private static int runOneTest(Object iValue) throws IOException {
         bStartExp = false;
         double save_clock = System.currentTimeMillis();
 //        IAbstractWrapper.GlobalStop = false;
@@ -217,7 +217,7 @@ public class JavaAutoTester {
 //C++ TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: DWORD dwGenericThread;
         int dwGenericThread;
-        new Thread(new Runnable() {
+        Thread t1 = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -227,32 +227,43 @@ public class JavaAutoTester {
                     System.out.print("\n");
                 }
             }
-        }).start();
-        HANDLE hThread1 = CreateThread(null, 0, StartThread, query, 0, dwGenericThread);
-        if (hThread1 == null) {
-//C++ TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
-//ORIGINAL LINE: DWORD dwError = GetLastError();
-            int dwError = GetLastError();
-            System.out.print("SCM:Error in Creating thread");
-            System.out.print(dwError);
-            System.out.print("\n");
-            return 1;
+        });
+        double start_time = System.currentTimeMillis();
+        t1.start();
+        double end_time = System.currentTimeMillis();
+        while((end_time - start_time)/1000 < duration) {
+            end_time = System.currentTimeMillis();
+            if ((end_time - start_time)/1000 > duration) {
+                t1.interrupt();
+                MyWrapper.GlobalStop = true;
+            }
         }
+
+//        HANDLE hThread1 = CreateThread(null, 0, StartThread, query, 0, dwGenericThread);
+//        if (hThread1 == null) {
+////C++ TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
+////ORIGINAL LINE: DWORD dwError = GetLastError();
+//            int dwError = GetLastError();
+//            System.out.print("SCM:Error in Creating thread");
+//            System.out.print(dwError);
+//            System.out.print("\n");
+//            return 1;
+//        }
 //C++ TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: DWORD returnWait = WaitForSingleObject(hThread1,duration);
-        int returnWait = WaitForSingleObject(hThread1, duration);
-        if (returnWait == WAIT_TIMEOUT) {
-            AbstractWrapper.GlobalStop = true;
+//        int returnWait = WaitForSingleObject(hThread1, duration);
+        if (MyWrapper.GlobalStop == true) {
+//            AbstractWrapper.GlobalStop = true;
             System.out.print("TIMEOUT");
             System.out.print("\n");
 //C++ TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: DWORD returnWait = WaitForSingleObject(hThread1,duration);
-            int returnWait = WaitForSingleObject(hThread1, duration);
-            if (returnWait == WAIT_TIMEOUT) {
-                System.out.print("Warning: Thread Refused to Stop");
-                System.out.print("\n");
-                WaitForSingleObject(hThread1, INFINITE);
-            }
+//            int returnWait = WaitForSingleObject(hThread1, duration);
+//            if (returnWait == WAIT_TIMEOUT) {
+//                System.out.print("Warning: Thread Refused to Stop");
+//                System.out.print("\n");
+//                WaitForSingleObject(hThread1, INFINITE);
+//            }
             writeToOutput("<timeout/>\n");
             writeToOutput("</query>\n");
             return 0;
@@ -266,7 +277,7 @@ public class JavaAutoTester {
                 // stop timer and calculate time
 //                double clocks_per_ms = (double) CLOCKS_PER_SEC / 1000;
 //                double user_time = (clock() - save_clock) / clocks_per_ms;
-                double user_time = (System.currentTimeMillis() - save_clock)
+                double user_time = (System.currentTimeMillis() - save_clock);
                 String bufTimeTaken = new String(new char[20]);
                 bufTimeTaken = String.format("%lf", user_time);
                 writeToOutput("<time_taken>" + bufTimeTaken + "</time_taken>\n");
@@ -277,7 +288,7 @@ public class JavaAutoTester {
         }
     }
 
-    private int StartThread(Object iValue) throws IOException {
+    private static int StartThread(Object iValue) throws IOException {
         Query query = (Query) iValue;
         try {
             stu_ans.clear();
@@ -301,28 +312,28 @@ public class JavaAutoTester {
 	  return 0;*/
     }
 
-    void mainThread() {
-        HANDLE hThread1,hThread2;
-        DWORD dwGenericThread;
-        char lszThreadParam[3];
-        strcpy(lszThreadParam,"3");
-        hThread1 = CreateThread(NULL,0,StartThread,&lszThreadParam,0,&dwGenericThread);
-        if(hThread1 == NULL) {
-            DWORD dwError = GetLastError();
-            cout<<"SCM:Error in Creating thread"<<dwError<<endl ;
-            return;
-        }
-        WaitForSingleObject(hThread1,INFINITE);
-        //Second thread creation
-        strcpy(lszThreadParam,"30");
-        hThread2 = CreateThread(NULL,0,StartThread,&lszThreadParam,0,&dwGenericThread);
-        if(hThread1 == NULL) {
-            DWORD dwError = GetLastError();
-            cout<<"SCM:Error in Creating thread"<<dwError<<endl ;
-            return;
-        }
-        WaitForSingleObject(hThread2,INFINITE);
-    }
+//    void mainThread() {
+//        HANDLE hThread1,hThread2;
+//        DWORD dwGenericThread;
+//        char lszThreadParam[3];
+//        strcpy(lszThreadParam,"3");
+//        hThread1 = CreateThread(NULL,0,StartThread,&lszThreadParam,0,&dwGenericThread);
+//        if(hThread1 == NULL) {
+//            DWORD dwError = GetLastError();
+//            cout<<"SCM:Error in Creating thread"<<dwError<<endl ;
+//            return;
+//        }
+//        WaitForSingleObject(hThread1,INFINITE);
+//        //Second thread creation
+//        strcpy(lszThreadParam,"30");
+//        hThread2 = CreateThread(NULL,0,StartThread,&lszThreadParam,0,&dwGenericThread);
+//        if(hThread1 == NULL) {
+//            DWORD dwError = GetLastError();
+//            cout<<"SCM:Error in Creating thread"<<dwError<<endl ;
+//            return;
+//        }
+//        WaitForSingleObject(hThread2,INFINITE);
+//    }
 
     private static void verifyAnswers(LinkedList<String> stu_ans, LinkedList<String> my_ans) throws IOException {
         // sort expected and student's answers and remove duplicates from answers
@@ -428,25 +439,39 @@ public class JavaAutoTester {
             System.out.print("\n");
             // run this test
 
-            HANDLE hThread1 = new HANDLE();
-//C++ TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
-//ORIGINAL LINE: DWORD dwGenericThread;
-            int dwGenericThread;
+            //IQuery finalQuery = query;
+            IQuery finalQuery = query;
+            Thread t1 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        runOneTest(finalQuery);
+                    } catch (IOException e) {
+                        System.out.println(e);
+                        System.out.print("\n");
+                    }
+                }
+            });
+            t1.start();
 
-            //cout << "Before entering runOneTest" << "\n";
-
-            hThread1 = CreateThread(null, 0, runOneTest, query, 0, dwGenericThread);
-            if (hThread1 == null)
-            {
-//C++ TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
-//ORIGINAL LINE: DWORD dwError = GetLastError();
-                int dwError = GetLastError();
-                System.out.print("SCM:Error in Creating thread");
-                System.out.print(dwError);
-                System.out.print("\n");
-                return;
-            }
-            WaitForSingleObject(hThread1,INFINITE);
+//            HANDLE hThread1 = new HANDLE();
+////C++ TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
+////ORIGINAL LINE: DWORD dwGenericThread;
+//            int dwGenericThread;
+//
+//            //cout << "Before entering runOneTest" << "\n";
+//
+//            hThread1 = CreateThread(null, 0, runOneTest, query, 0, dwGenericThread);
+//            if (hThread1 == null) {
+////C++ TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
+////ORIGINAL LINE: DWORD dwError = GetLastError();
+//                int dwError = GetLastError();
+//                System.out.print("SCM:Error in Creating thread");
+//                System.out.print(dwError);
+//                System.out.print("\n");
+//                return;
+//            }
+//            WaitForSingleObject(hThread1,INFINITE);
 		/*hThread1 = CreateThread(NULL,0,runOneTest,query,0,&dwGenericThread);
 		if(hThread1 == NULL)
 		{
@@ -460,16 +485,12 @@ public class JavaAutoTester {
             // get the next query
             query = null;
             sNewCategory = null;
-
-            if ((argument == 4) || (argument == 6))
-            {
+            if ((argument == 4) || (argument == 6)) {
                 query = query_mgr.getQuery(sNewCategory);
             }
-
             //query = query_mgr->getQuery(&sNewCategory);
         } // while
-        if (!bFirst)
-        {
+        if (!bFirst) {
             writeToOutput("</category>\n");
         }
         writeToOutput("</queries>\n");

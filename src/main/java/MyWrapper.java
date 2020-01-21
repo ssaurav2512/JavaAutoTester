@@ -17,7 +17,8 @@ import java.util.LinkedList;
 //ORIGINAL LINE: void TestWrapper::parse(String filename)
 
 public class MyWrapper implements ITestWrapper, IAbstractWrapper {
-//    public AbstractWrapper createWrapper() {
+    public static boolean GlobalStop = false;
+    //    public AbstractWrapper createWrapper() {
 //        if (GlobalMembers.wrapper == null)
 //        {
 //            GlobalMembers.wrapper = new TestWrapper();
@@ -175,7 +176,7 @@ public class MyWrapper implements ITestWrapper, IAbstractWrapper {
             } else if (query.equals("procedure p, q; Select <p, q> such that Calls(p, q)")) {
                 for (int i = 0; i < 5; i++) {
                     for (int j = 0; j < 500000000; j++) {
-                        if (IAbstractWrapper.GlobalStop) {
+                        if (GlobalStop) {
                             System.out.print("receive cancel: cleaning up");
                             System.out.print("\n");
                             return;
