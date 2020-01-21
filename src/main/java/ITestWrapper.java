@@ -17,6 +17,6 @@ public interface ITestWrapper extends Closeable, IAbstractWrapper {
 
     // method for evaluating a query
 //C++ TO JAVA CONVERTER TODO TASK: The implementation of the following method could not be found:
-    public static void evaluate(String query, LinkedList<String> results);
+//    public static void evaluate(String query, LinkedList<String> results);
 }
 
