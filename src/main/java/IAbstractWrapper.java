@@ -7,6 +7,9 @@ public interface IAbstractWrapper
     public static boolean GlobalStop = false;
     // method for parsing the SIMPLE source
     void parse(String filename);
+
     // method for evaluating a query
-    void evaluate(String query, LinkedList<String> results);
+    static void evaluate(String query, LinkedList<String> results) {
+
+    }
 }

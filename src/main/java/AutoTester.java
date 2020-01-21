@@ -7,13 +7,23 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class AutoTester {
+public class AutoTester implements IAbstractWrapper{
 
     private static String outputfile = "";
     private static int argument = 0;
+    LinkedList<String> stu_ans = new LinkedList<String>; // collects the student's answer
+    private boolean bStartExp = false;
 
     public static int find_last_of(String sequence, String str) {
         return CharMatcher.anyOf( str ).lastIndexIn( sequence );
+    }
+
+    public int find_first_not_of( String sequence, String str ) {
+        return CharMatcher.anyOf( str ).negate().indexIn( sequence );
+    }
+
+    public int find_last_not_of( String sequence, String str ) {
+        return CharMatcher.anyOf( str ).negate().lastIndexIn( sequence );
     }
 
     private static void writeToOutput(String s) throws IOException {
@@ -37,6 +47,270 @@ public class AutoTester {
         }
         writeToOutput(sBeg + sFullContent + sAft + "\n");
         System.out.print("\n");
+    }
+
+    private int runOneTest(Object iValue) throws IOException {
+        bStartExp = false;
+        double save_clock = System.currentTimeMillis();
+//        IAbstractWrapper.GlobalStop = false;
+        writeToOutput("<query>\n");
+        LinkedList<String> right_ans = new LinkedList<String>(); // collects the right's answer
+        Query query = (Query) iValue;
+        String iId = query.getId();
+        int seqID = 0;
+        int commentsPos = iId.indexOf("-");
+        String comment = "";
+        // no tags
+        if (commentsPos != -1) {
+            String id = iId.substring(0, commentsPos);
+            seqID = Integer.parseInt(id);
+            comment = iId.substring(commentsPos + 1);
+        }
+        // none
+        else {
+            seqID = Integer.parseInt(iId);
+        }
+        writeToOutput("<id ");
+        String[][] arrayTag =
+                {
+                        {"Follows", "Follows"},
+                        {"Follows*", "Followsstar"},
+                        {"Parent", "Parent"},
+                        {"Parent*", "Parentstar"},
+                        {"Modifies", "Modifies"},
+                        {"Uses", "Uses"},
+                        {"Calls", "Calls"},
+                        {"Calls*", "Callsstar"},
+                        {"Next", "Next"},
+                        {"Next*", "Nextstar"},
+                        {"Affects", "Affects"},
+                        {"Affects*", "Affectsstar"},
+                        {"pattern", "Pattern"},
+                        {"with", "With"},
+                        {"BOOLEAN", "ReturnBoolean"},
+                        {"such", "SuchThat"},
+                        {"UnnamedVar", "UnnamedVar"}
+                };
+        int happenUnnamedVar = 0;
+        String queryString = query.getQueryString();
+        final String seps = "\\)\\( ";
+        String[] token;
+        TreeMap<String, Integer> tagInsert = new TreeMap<String, Integer>();
+        //We tokenise the queryString here with the help of strtok.
+        token = queryString.split(seps);
+        // We iterate each token.
+        for (int j = 0; j < token.length; j++) {
+            String tah = token[j];
+            int found = tah.indexOf("_");
+            //We check for UnnamedVar "_".
+            if (found != -1) {
+                System.out.print(tah);
+                System.out.print(" is an Unnamedvar ");
+                System.out.print("\n");
+                happenUnnamedVar = happenUnnamedVar + 1;
+//                Iterator<String, Integer> iPairFound = tagInsert.find("UnnamedVar");
+                boolean iPairFound = tagInsert.containsKey("UnnamedVar");
+//C++ TO JAVA CONVERTER TODO TASK: Iterators are only converted within the context of 'while' and 'for' loops:
+                if (iPairFound != false) {
+                    tagInsert.remove("UnnamedVar");
+                }
+                tagInsert.put("UnnamedVar", happenUnnamedVar);
+            }
+            //Now compare the token with the 17 items in arrayTag to check if the token belongs to which items: Follows* or Parent or Such That
+            for (int i = 0; i < 16; i++) {
+                if (arrayTag[i][0].equals(tah)) {
+                    boolean iPairFound = tagInsert.containsKey("UnnamedVar");
+//C++ TO JAVA CONVERTER TODO TASK: Iterators are only converted within the context of 'while' and 'for' loops:
+                    if (iPairFound != false) {
+                        int happen = 0;
+//C++ TO JAVA CONVERTER TODO TASK: Iterators are only converted within the context of 'while' and 'for' loops:
+                        happen = tagInsert.get("UnnamedVar");
+                        happen = happen + 1;
+                        System.out.print("The happen is ");
+                        System.out.print(happen);
+                        System.out.print("\n");
+                        tagInsert.remove(tah);
+                        tagInsert.put(tah, happen);
+                    } else {
+                        tagInsert.put(tah, 1);
+                    }
+                }
+            }
+        }
+        //To calculate the sum of all the values of all the keys
+        int sumOfTagValues = 0;
+//C++ TO JAVA CONVERTER TODO TASK: There is no equivalent to implicit typing in Java unless the Java 10 inferred typing option is selected:
+//        for (auto iElement = tagInsert.cbegin() ; iElement != tagInsert.cend(); ++iElement) {
+//            ////	cout << "The key is " << iElement->first << " and the value is " << iElement->second << "\n";
+//            sumOfTagValues = sumOfTagValues + iElement.second;
+//        }
+        Set<String> keys = tagInsert.keySet();
+        for (String key : keys) {
+            sumOfTagValues = sumOfTagValues + tagInsert.get(key);
+        }
+        String tagStr = ""; // Declare the tag string
+        boolean booleanFound = tagInsert.containsKey("BOOLEAN");
+        // If no boolean, then the query is a tuple.
+        if (booleanFound == true) {
+            System.out.print("No ReturnBoolean, ReturnTuple=1 ");
+            System.out.print("\n");
+            tagInsert.put("ReturnTuple", 1);
+            tagStr = "ReturnTuple=\"1\" ";
+            sumOfTagValues = sumOfTagValues + 1;
+        }
+        //Now we attempt to build the tagString by iterating through all the items in the tagInsert array.
+//C++ TO JAVA CONVERTER TODO TASK: There is no equivalent to implicit typing in Java unless the Java 10 inferred typing option is selected:
+        for (String key : keys) {
+            for (int i = 0; i < 17; i++) {
+                if (arrayTag[i][0] == key) {
+//                    std::stringstream out = new std::stringstream();
+//                    out << iElement.second;
+                    System.out.println(tagInsert.get(key));
+//C++ TO JAVA CONVERTER TODO TASK: There are no gotos or labels in Java:
+//                    std:
+                    String s = String.valueOf(tagInsert.get(key));
+                    tagStr = tagStr + arrayTag[i][1] + "=\"" + s + "\" ";
+                }
+            }
+        }
+//        std::stringstream outsumOfTagValues = new std::stringstream();
+//        outsumOfTagValues << sumOfTagValues;
+        String s1 = String.valueOf(sumOfTagValues);
+        tagStr = tagStr + "CondNum=\"" + s1 + "\" ";
+        // Now we try to obtain the number of relationship items
+        int tagRelationshipCount = 0;
+//C++ TO JAVA CONVERTER TODO TASK: There is no equivalent to implicit typing in Java unless the Java 10 inferred typing option is selected:
+        for (String key : keys) {
+            for (int i = 0; i < 12; i++) {
+                if (arrayTag[i][0] == key) {
+//                    std::stringstream outsumOfTagRelationValues = new std::stringstream();
+//                    outsumOfTagRelationValues << iElement.second;
+                    String s2 = String.valueOf(tagInsert.get(key));
+                    tagRelationshipCount = tagRelationshipCount + tagInsert.get(key);
+                }
+            }
+        }
+//        std::stringstream output = new std::stringstream();
+//        output << tagRelationshipCount;
+        String s = String.valueOf(tagRelationshipCount);
+        tagStr = tagStr + "RelNum=" + "\"" + s + "\" ";
+        System.out.print("The final tag string is ");
+        System.out.print(tagStr);
+        System.out.print("\n");
+        String tag = tagStr;
+        writeToOutput(tag);
+        // print comments
+//        comment.erase(0, comment.find_first_not_of(" \n"));
+        comment = comment.substring(find_first_not_of(" \n",comment),comment.length());
+//        comment = find_first_not_of(" \n",comment);
+//        comment.erase(comment.find_last_not_of(' ') + 1);
+        comment = comment.replace(String.valueOf(comment.charAt(find_last_not_of(" ",comment) + 1)),"");
+        if (commentsPos != -1) {
+            writeToOutput("comment=\"" + comment + "\"");
+        }
+        // print id
+        String buf = new String(new char[10]);
+        buf = String.format("%d", seqID);
+        writeToOutput(">" + buf + "</id>");
+        writeToOutput("<querystr><![CDATA[" + query.getQueryString() + "]]></querystr>\n");
+        int duration = query.getDuration();
+//C++ TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
+//ORIGINAL LINE: DWORD dwGenericThread;
+        int dwGenericThread;
+        HANDLE hThread1 = CreateThread(null, 0, StartThread, query, 0, dwGenericThread);
+        if (hThread1 == null) {
+//C++ TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
+//ORIGINAL LINE: DWORD dwError = GetLastError();
+            int dwError = GetLastError();
+            System.out.print("SCM:Error in Creating thread");
+            System.out.print(dwError);
+            System.out.print("\n");
+            return 1;
+        }
+//C++ TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
+//ORIGINAL LINE: DWORD returnWait = WaitForSingleObject(hThread1,duration);
+        int returnWait = WaitForSingleObject(hThread1, duration);
+        if (returnWait == WAIT_TIMEOUT) {
+            AbstractWrapper.GlobalStop = true;
+            System.out.print("TIMEOUT");
+            System.out.print("\n");
+//C++ TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
+//ORIGINAL LINE: DWORD returnWait = WaitForSingleObject(hThread1,duration);
+            int returnWait = WaitForSingleObject(hThread1, duration);
+            if (returnWait == WAIT_TIMEOUT) {
+                System.out.print("Warning: Thread Refused to Stop");
+                System.out.print("\n");
+                WaitForSingleObject(hThread1, INFINITE);
+            }
+            writeToOutput("<timeout/>\n");
+            writeToOutput("</query>\n");
+            return 0;
+        } else {
+            if (!bStartExp) {
+                System.out.print("Your answer: ");
+                printList(stu_ans, "<stuans>", "</stuans>", ",");
+                query.getAnswers(right_ans);
+                System.out.print("Correct answer: ");
+                printList(right_ans, "<correct>", "</correct>", ",");
+                // stop timer and calculate time
+//                double clocks_per_ms = (double) CLOCKS_PER_SEC / 1000;
+//                double user_time = (clock() - save_clock) / clocks_per_ms;
+                double user_time = (System.currentTimeMillis() - save_clock)
+                String bufTimeTaken = new String(new char[20]);
+                bufTimeTaken = String.format("%lf", user_time);
+                writeToOutput("<time_taken>" + bufTimeTaken + "</time_taken>\n");
+                verifyAnswers(stu_ans, right_ans);
+            }
+            writeToOutput("</query>\n");
+            return 0;
+        }
+    }
+
+    private int StartThread(Object iValue) throws IOException {
+        Query query = (Query) iValue;
+        try {
+            stu_ans.clear();
+            MyWrapper.evaluate(query.getQueryString(), stu_ans);
+        }
+        catch (Exception cr) {
+            String s = "<exception>";
+            s = s + cr;
+            s = s + "</exception>\n";
+            writeToOutput(s);
+            bStartExp = true;
+            return 1;
+        }
+        bStartExp = false;
+        return 0;
+	/*char lszParam[3];
+	  strcpy(lszParam,(char *)iValue);
+	  int iStart = atoi(lszParam);
+	  for(int i=iStart;i<=iStart+10;i++)
+	  cout<<i<<endl;
+	  return 0;*/
+    }
+
+    void mainThread() {
+        HANDLE hThread1,hThread2;
+        DWORD dwGenericThread;
+        char lszThreadParam[3];
+        strcpy(lszThreadParam,"3");
+        hThread1 = CreateThread(NULL,0,StartThread,&lszThreadParam,0,&dwGenericThread);
+        if(hThread1 == NULL) {
+            DWORD dwError = GetLastError();
+            cout<<"SCM:Error in Creating thread"<<dwError<<endl ;
+            return;
+        }
+        WaitForSingleObject(hThread1,INFINITE);
+        //Second thread creation
+        strcpy(lszThreadParam,"30");
+        hThread2 = CreateThread(NULL,0,StartThread,&lszThreadParam,0,&dwGenericThread);
+        if(hThread1 == NULL) {
+            DWORD dwError = GetLastError();
+            cout<<"SCM:Error in Creating thread"<<dwError<<endl ;
+            return;
+        }
+        WaitForSingleObject(hThread2,INFINITE);
     }
 
     private static void verifyAnswers(LinkedList<String> stu_ans, LinkedList<String> my_ans) throws IOException {
@@ -316,4 +590,13 @@ public class AutoTester {
         System.out.print("AutoTester Completed !\n");
     }
 
+    @Override
+    public void parse(String filename) {
+
+    }
+
+    @Override
+    public void evaluate(String query, LinkedList<String> results) {
+
+    }
 }

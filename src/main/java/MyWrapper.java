@@ -46,7 +46,7 @@ public class MyWrapper implements ITestWrapper, IAbstractWrapper {
         System.out.print("\n");
     }
 
-    public void evaluate(String query, LinkedList<String> results) {
+    public static void evaluate(String query, LinkedList<String> results) {
         System.out.print(query);
         System.out.print("\n");
         try {
