@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class AutoTester implements IAbstractWrapper{
+public class JavaAutoTester {
 
     private static String outputfile = "";
     private static int argument = 0;
@@ -217,6 +217,17 @@ public class AutoTester implements IAbstractWrapper{
 //C++ TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: DWORD dwGenericThread;
         int dwGenericThread;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    StartThread(query);
+                } catch (IOException e) {
+                    System.out.println(e);
+                    System.out.print("\n");
+                }
+            }
+        }).start();
         HANDLE hThread1 = CreateThread(null, 0, StartThread, query, 0, dwGenericThread);
         if (hThread1 == null) {
 //C++ TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
@@ -448,7 +459,6 @@ public class AutoTester implements IAbstractWrapper{
             //runOneTest(query,wr,outputfile);
             // get the next query
             query = null;
-            query = null;
             sNewCategory = null;
 
             if ((argument == 4) || (argument == 6))
@@ -588,15 +598,5 @@ public class AutoTester implements IAbstractWrapper{
 
         writeToOutput("</test_results>\n");
         System.out.print("AutoTester Completed !\n");
-    }
-
-    @Override
-    public void parse(String filename) {
-
-    }
-
-    @Override
-    public void evaluate(String query, LinkedList<String> results) {
-
     }
 }
